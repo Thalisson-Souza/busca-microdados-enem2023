@@ -5,6 +5,9 @@
 #include <string.h>
 #include "utils.h"
 
+/* gcc main.c hash_inscricao.c hash_nota.c utils.c -o execute -ansi -pedantic */
+/* ./execute */
+
 void menuInterativo(FILE *file) {
     int opcao;
     char num_inscricao[20];
