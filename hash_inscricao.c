@@ -6,7 +6,6 @@
 
 #define TABLE_SIZE 100003
 
-
 typedef struct HashEntry {
     char inscricao[20];
     long file_offset;
@@ -107,5 +106,20 @@ void buscar_por_inscricao_hash(FILE *file, const char *num_inscricao) {
         printf("Nota Redacao: %d\n", inscricao.NU_NOTA_REDACAO);
     } else {
         printf("Inscricao nao encontrada.\n");
+    }
+}
+
+void liberar_hash_inscricao() {
+    int i;
+    HashEntry *entry;
+    HashEntry *temp;
+    for (i = 0; i < TABLE_SIZE; i++) {
+        entry = hash_table[i];
+        while (entry) {
+            temp = entry;
+            entry = entry->next;
+            free(temp);
+        }
+        hash_table[i] = NULL;
     }
 }
