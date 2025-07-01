@@ -44,6 +44,32 @@ static NotaEntry *find_nota_entry(int nota) {
     return NULL;
 }
 
+void hash_insert_notas(int nota, long offset) {
+    unsigned long index = hash_func_int(nota);
+    NotaEntry *entry = hash_table[index];
+
+    while (entry) {
+        if (entry->nota == nota) {
+            insert_offset(entry, offset);
+            return;
+        }
+        entry = entry->next;
+    }
+
+    entry = (NotaEntry *)malloc(sizeof(NotaEntry));
+    if (!entry) {
+        fprintf(stderr, "Erro de memoria\n");
+        exit(1);
+    }
+    entry->nota = nota;
+    entry->offsets = NULL;
+
+    insert_offset(entry, offset);
+
+    entry->next = hash_table[index];
+    hash_table[index] = entry;
+}
+
 void construir_hash_notas(FILE *file) {
     char line[MAX_LINE_LENGTH];
     long offset;
@@ -139,3 +165,28 @@ void listar_maior_nota_com_hash(FILE *file) {
     printf("\nTotal de inscricoes com nota %d: %d\n", maior_nota, cont);
 }
 
+void liberar_hash_nota() {
+    int i;
+    NotaEntry *entry;
+    NotaEntry *temp_entry;
+    OffsetNode *offset;
+    OffsetNode *temp_offset;
+
+    for (i = 0; i < TABLE_SIZE; i++) {
+        entry = hash_table[i];
+        while (entry) {
+            temp_entry = entry;
+            entry = entry->next;
+
+            offset = temp_entry->offsets;
+            while (offset) {
+                temp_offset = offset;
+                offset = offset->next;
+                free(temp_offset);
+            }
+
+            free(temp_entry);
+        }
+        hash_table[i] = NULL;
+    }
+}
