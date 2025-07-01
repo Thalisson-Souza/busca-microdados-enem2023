@@ -5,7 +5,7 @@
 #include <string.h>
 #include "utils.h"
 
-/* gcc main.c hash_inscricao.c hash_nota.c utils.c -o execute -ansi -pedantic */
+/* gcc main.c hash_inscricao.c hash_nota.c hash_municipio.c utils.c -o execute -ansi -pedantic */
 /* ./execute */
 
 void hash_insert(const char *inscricao, long offset);
