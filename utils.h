@@ -13,5 +13,7 @@ typedef struct {
 int parse_csv_line(char *line, Inscricao *inscricao);
 void remover_quebra_linha(char *line);
 int ignorar_cabecalho(FILE *file);
+unsigned long hash_func_string(const char *str);
+
 
 #endif
