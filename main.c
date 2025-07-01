@@ -1,12 +1,16 @@
 #include <stdio.h>
 #include "hash_inscricao.h"
 #include "hash_nota.h"
-/* #include "hash_municipio.h" */
+#include "hash_municipio.h"
 #include <string.h>
 #include "utils.h"
 
 /* gcc main.c hash_inscricao.c hash_nota.c utils.c -o execute -ansi -pedantic */
 /* ./execute */
+
+void hash_insert(const char *inscricao, long offset);
+void hash_insert_notas(int nota, long offset);
+void hash_insert_municipio(const char *municipio, const char *uf, long offset);
 
 void menuInterativo(FILE *file) {
     int opcao;
@@ -33,11 +37,11 @@ void menuInterativo(FILE *file) {
                 listar_maior_nota_com_hash(file);
                 break;
             case 3:
-            /*   printf("Digite o nome do municipio: "); */
-            /*    scanf(" %99[^\n]", municipio); */
-            /*    printf("Digite a UF: "); */
-            /*   scanf(" %2s", uf); */
-            /*    listar_inscricoes_por_municipio_uf(file, municipio, uf); */
+            printf("Digite o nome do municipio: ");
+                scanf(" %99[^\n]", municipio);
+                printf("Digite a UF: ");
+                scanf(" %2s", uf);
+                listar_inscricoes_por_municipio(file, municipio, uf);
                 break;
             case 0:
                 printf("Saindo...\n");
@@ -48,6 +52,29 @@ void menuInterativo(FILE *file) {
     } while (opcao != 0);
 }
 
+void construir_hashes(FILE *file) {
+    char line[MAX_LINE_LENGTH];
+    long offset;
+    Inscricao inscricao;
+
+    ignorar_cabecalho(file);
+
+    while (1) {
+        offset = ftell(file);
+        if (!fgets(line, sizeof(line), file)) break;
+
+        remover_quebra_linha(line);
+
+        if (!parse_csv_line(line, &inscricao)) continue;
+        hash_insert(inscricao.NU_INSCRICAO, offset);  
+        hash_insert_notas(inscricao.NU_NOTA_REDACAO, offset); 
+        hash_insert_municipio(inscricao.NO_MUNICIPIO_PROVA, inscricao.SG_UF_PROVA, offset);  
+    }
+    fseek(file, 0, SEEK_SET);  
+}
+
+
+
 int main() {
     FILE *file = fopen("MICRODADOS_ENEM_2023.csv", "rb");
     if (!file) {
@@ -55,11 +82,14 @@ int main() {
         return 1;
     }
 
-    construir_hash_inscricao(file); 
-    construir_hash_notas(file);   
-    /*construir_hash_municipio_uf(file);*/
+    printf("Carregando os Microdados enem 2023... (aproximadamente 30-35segundos - dependendo da sua configuracao!)...");
+    construir_hashes(file); 
 
     menuInterativo(file);
+
+    liberar_hash_inscricao();
+    liberar_hash_municipio();
+    liberar_hash_nota();
 
     fclose(file);
     return 0;
